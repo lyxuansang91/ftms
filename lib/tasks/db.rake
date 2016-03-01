@@ -17,9 +17,8 @@ namespace :db do
 
     puts "Creating Role"
     Fabricate :role, name: "admin"
-    3.times do
-      Fabricate :role
-    end
+    Fabricate :role, name: "trainer"
+    Fabricate :role, name: "trainee"
 
     puts "Creating Permission"
     3.times do

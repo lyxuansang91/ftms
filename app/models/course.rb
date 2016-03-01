@@ -1,6 +1,10 @@
 class Course < ActiveRecord::Base
   include PublicActivity::Model
   include InitUserSubject
+
+  QUERY = "users.id in (SELECT user_id FROM user_roles WHERE role_id = (SELECT
+    id FROM roles WHERE roles.name = :role_name))"
+
   tracked only: [:finish_course, :start_course],
     owner: ->(controller, model) {controller.current_user}
   has_many :activities, as: :trackable, class_name: "PublicActivity::Activity", dependent: :destroy
@@ -12,22 +16,24 @@ class Course < ActiveRecord::Base
   validate :check_end_date, on: [:create, :update]
 
   has_many :course_subjects, dependent: :destroy
-  has_many :user_courses, dependent: :destroy
   has_many :user_subjects, dependent: :destroy
-  has_many :users, through: :user_courses
+  has_many :user_courses, dependent: :destroy
   has_many :subjects, through: :course_subjects
 
-  has_many :course_leaders, class_name: UserCourse.name,
+  has_many :course_trainees, class_name: UserCourse.name,
                             dependent: :destroy,
                             foreign_key: :course_id,
                             inverse_of: :course
-  has_many :leaders, through: :course_leaders
+  has_many :trainees, -> {where QUERY, role_name: "trainee"}, through:
+   :course_trainees, source: "user"
 
-  has_many :course_supervisors, class_name: UserCourse.name,
-                                dependent: :destroy,
-                                foreign_key: :course_id,
-                                inverse_of: :course
-  has_many :supervisors, through: :course_supervisors
+  has_many :course_trainers, class_name: UserCourse.name,
+                            dependent: :destroy,
+                            foreign_key: :course_id,
+                            inverse_of: :course
+
+  has_many :trainers, -> {where QUERY, role_name: "trainer"}, through:
+   :course_trainers, source: "user"
 
   enum status: [:init, :progress, :finish]
 
@@ -38,7 +44,7 @@ class Course < ActiveRecord::Base
   end
 
   def create_course_owner user
-    course_supervisors.create supervisor_id: user.id, course_id: id, leader_id: user.id
+    UserCourse.create course_id: id, user_id: user.id
   end
 
   def check_day_present

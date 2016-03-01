@@ -11,6 +11,8 @@ defaults: &defaults
   finished: "finished"
   date_format: "%H:%M:%S %-d %B %Y"
   date_course_format: "%-d %B %Y"
+  query: "users.id in (select user_id from user_roles where role_id in (select
+    id from roles where roles.name = :role_name))"
   course_subject:
     finish: "finish"
     start: "progress"

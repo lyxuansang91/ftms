@@ -188,13 +188,11 @@ ActiveRecord::Schema.define(version: 20160225030820) do
   end
 
   create_table "user_courses", force: :cascade do |t|
-    t.boolean  "active",                  default: true
-    t.integer  "user_id",       limit: 4
-    t.integer  "supervisor_id", limit: 4
-    t.integer  "leader_id",     limit: 4
-    t.integer  "course_id",     limit: 4
-    t.datetime "created_at",                             null: false
-    t.datetime "updated_at",                             null: false
+    t.boolean  "active",               default: true
+    t.integer  "user_id",    limit: 4
+    t.integer  "course_id",  limit: 4
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
   end
 
   create_table "user_roles", force: :cascade do |t|
